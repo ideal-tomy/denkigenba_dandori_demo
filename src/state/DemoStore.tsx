@@ -31,6 +31,7 @@ type RequestState = {
   clearedReviews: string[];
   taskStates: Record<string, TaskStatus>;
   draftEdits: Partial<Record<DraftKind, Record<string, string>>>;
+  packetEdits: Record<string, Record<string, string>>;
 };
 
 type Store = {
@@ -66,6 +67,12 @@ type Store = {
   executeTasks: ExecuteTask[];
   taskStatusOf: (id: string) => TaskStatus;
   completeTask: (id: string) => void;
+  packetTaskId: string | null;
+  openPacket: (id: string) => void;
+  closePacket: () => void;
+  packetFieldOf: (taskId: string, key: string, fallback: string) => string;
+  setPacketField: (taskId: string, key: string, value: string) => void;
+  markPacketReady: (taskId: string) => void;
   permitDone: number;
   permitTotal: number;
   crewDone: number;
@@ -91,6 +98,7 @@ function initialRequestState(id: string): RequestState {
     clearedReviews: [],
     taskStates: {},
     draftEdits: {},
+    packetEdits: {},
   };
 }
 
@@ -113,6 +121,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [naraMode, setNaraMode] = useState(false);
   const [draftKind, setDraftKind] = useState<DraftKind | null>(null);
   const [evidenceId, setEvidenceId] = useState<EvidenceId | null>(null);
+  const [packetTaskId, setPacketTaskId] = useState<string | null>(null);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const [lockPulse, setLockPulse] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -214,6 +223,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     setNaraMode(false);
     setDraftKind(null);
     setEvidenceId(null);
+    setPacketTaskId(null);
     window.scrollTo(0, 0);
   }, []);
 
@@ -344,6 +354,51 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     [activeId],
   );
 
+  const packetFieldOf = useCallback(
+    (taskId: string, key: string, fallback: string) => {
+      return cur?.packetEdits?.[taskId]?.[key] ?? fallback;
+    },
+    [cur],
+  );
+
+  const setPacketField = useCallback(
+    (taskId: string, key: string, value: string) => {
+      if (!activeId) return;
+      setStates((prev) => {
+        const st = prev[activeId];
+        return {
+          ...prev,
+          [activeId]: {
+            ...st,
+            packetEdits: {
+              ...(st.packetEdits ?? {}),
+              [taskId]: { ...(st.packetEdits?.[taskId] ?? {}), [key]: value },
+            },
+          },
+        };
+      });
+    },
+    [activeId],
+  );
+
+  const markPacketReady = useCallback(
+    (taskId: string) => {
+      if (!activeId) return;
+      setStates((prev) => {
+        const st = prev[activeId];
+        return {
+          ...prev,
+          [activeId]: {
+            ...st,
+            taskStates: { ...st.taskStates, [taskId]: "done" },
+          },
+        };
+      });
+      setToast("提出できる状態にしました。このデモでは申請提出しません。");
+    },
+    [activeId],
+  );
+
   const statusOf = useCallback(
     (requestId: string): "needs-check" | "draft" | "preparing" | "done" => {
       const st = states[requestId];
@@ -397,6 +452,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     executeTasks,
     taskStatusOf,
     completeTask,
+    packetTaskId,
+    openPacket: (id: string) => setPacketTaskId(id),
+    closePacket: () => setPacketTaskId(null),
+    packetFieldOf,
+    setPacketField,
+    markPacketReady,
     permitDone,
     permitTotal: permitTasks.length,
     crewDone,

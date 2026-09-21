@@ -8,7 +8,7 @@ export function ExecuteView() {
     workDateIso,
     executeTasks,
     taskStatusOf,
-    completeTask,
+    openPacket,
     permitDone,
     permitTotal,
     crewDone,
@@ -33,9 +33,9 @@ export function ExecuteView() {
 
         <div className="execute-hero">
           <span className="eyebrow">段取り確定後</span>
-          <h2 className="execute-title">申請と人員の準備を進めます</h2>
+          <h2 className="execute-title">申請と人員の書類をそろえます</h2>
           <p className="lede execute-lede">
-            {site.title}は確定済みです。申請書の確認と、警備会社への配置依頼を順に進めてください。このデモでは実際の提出・配置依頼は行いません。
+            {site.title}は確定済みです。各項目の申請書や依頼書を開き、内容を確認・直してから提出できる状態にしてください。このデモでは実際の提出・配置依頼は行いません。
           </p>
           <div className="execute-progress">
             申請 {permitDone}/{permitTotal} ・ 人員 {crewDone}/{crewTotal}
@@ -63,15 +63,14 @@ export function ExecuteView() {
                       {task.title}
                     </div>
                     <div className="exec-task-detail">{task.detail}</div>
-                    <div className="exec-task-due">締切 {fmtDate(due)}（作業日の{task.dueOffset}日前）</div>
+                    <div className="exec-task-docs">{task.attachments.join("、")}</div>
+                    <div className="exec-task-due">
+                      締切 {fmtDate(due)}（作業日の{task.dueOffset}日前）
+                    </div>
                   </div>
-                  {done ? (
-                    <span className="pill is-ok">完了</span>
-                  ) : (
-                    <button type="button" className="draftbtn" onClick={() => completeTask(task.id)}>
-                      {task.actionLabel}
-                    </button>
-                  )}
+                  <button type="button" className="draftbtn" onClick={() => openPacket(task.id)}>
+                    {done ? "書類を見直す" : "書類を開く"}
+                  </button>
                 </div>
               );
             })}
@@ -94,15 +93,14 @@ export function ExecuteView() {
                       {task.title}
                     </div>
                     <div className="exec-task-detail">{task.detail}</div>
-                    <div className="exec-task-due">締切 {fmtDate(due)}（作業日の{task.dueOffset}日前）</div>
+                    <div className="exec-task-docs">{task.attachments.join("、")}</div>
+                    <div className="exec-task-due">
+                      締切 {fmtDate(due)}（作業日の{task.dueOffset}日前）
+                    </div>
                   </div>
-                  {done ? (
-                    <span className="pill is-ok">完了</span>
-                  ) : (
-                    <button type="button" className="draftbtn" onClick={() => completeTask(task.id)}>
-                      {task.actionLabel}
-                    </button>
-                  )}
+                  <button type="button" className="draftbtn" onClick={() => openPacket(task.id)}>
+                    {done ? "書類を見直す" : "書類を開く"}
+                  </button>
                 </div>
               );
             })}
@@ -111,7 +109,7 @@ export function ExecuteView() {
 
         {allTasksDone ? (
           <div className="approve-bar is-done">
-            <p>申請と人員の準備がそろいました。依頼一覧に戻って状態を確認できます。</p>
+            <p>申請と人員の書類が提出できる状態になりました。依頼一覧に戻って状態を確認できます。</p>
             <button type="button" className="go approve-btn" onClick={backToInbox}>
               依頼一覧へ
             </button>

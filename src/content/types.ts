@@ -31,13 +31,41 @@ export type ExtractField = {
   highlight?: string;
 };
 
+export type PacketKind = "road-use" | "road-occupy" | "buried" | "crew-guard";
+
 export type ExecuteTask = {
   id: string;
   kind: "permit" | "crew";
+  packetKind: PacketKind;
   title: string;
   detail: string;
   dueOffset: number;
   actionLabel: string;
+  attachments: string[];
+};
+
+export type PacketField = {
+  key: string;
+  label: string;
+  value: string;
+  editable?: boolean;
+};
+
+export type PacketDocKind =
+  | "road-use-form"
+  | "regulation-plan"
+  | "occupy-form"
+  | "buried-form"
+  | "guard-order"
+  | "guard-contract";
+
+export type PacketDoc = {
+  id: string;
+  tab: string;
+  kind: PacketDocKind;
+  title: string;
+  note?: string;
+  fields: PacketField[];
 };
 
 export type EvidenceRow = {

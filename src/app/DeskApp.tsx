@@ -6,6 +6,7 @@ import { ExecuteView } from "../components/ExecuteView";
 import { InboxView } from "../components/InboxView";
 import { IngestView } from "../components/IngestView";
 import { ResultView } from "../components/ResultView";
+import { SubmitPacketModal } from "../components/SubmitPacketModal";
 import { DemoProvider, useDemo } from "../state/DemoStore";
 
 function DeskInner() {
@@ -26,6 +27,7 @@ function DeskInner() {
       {view === "execute" ? <ExecuteView /> : null}
       <DraftModal />
       <EvidenceModal />
+      <SubmitPacketModal />
       {toast ? (
         <div className="toast" role="status">
           {toast}
