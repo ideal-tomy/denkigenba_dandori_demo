@@ -1,3 +1,5 @@
+import { ApproveBar } from "./ApproveBar";
+import { ExtractReview } from "./ExtractReview";
 import { fmtDate, parseWorkDate } from "../lib/dates";
 import type { DraftKind } from "../content/types";
 import { useDemo } from "../state/DemoStore";
@@ -7,6 +9,7 @@ export function ResultView() {
     site,
     activeRequest,
     workDateIso,
+    guardCount,
     naraMode,
     toggleNara,
     backToInbox,
@@ -25,7 +28,10 @@ export function ResultView() {
     : site.title;
 
   const scheduleItems = [...site.sched].sort((a, b) => b.off - a.off);
-  const crewTotal = site.crew.reduce((sum, c) => sum + c.q, 0);
+  const crewTotal = site.crew.reduce((sum, c) => {
+    if (c.r.includes("交通誘導")) return sum + (guardCount || c.q);
+    return sum + c.q;
+  }, 0);
 
   return (
     <main id="result">
@@ -34,7 +40,12 @@ export function ResultView() {
           ← 依頼一覧へ
         </button>
 
-        <section className="summary reveal">
+        <div className="secttl" style={{ marginTop: 18 }}>
+          取り込んだ内容の確認
+        </div>
+        <ExtractReview />
+
+        <section className="summary reveal" style={{ marginTop: 28 }}>
           <div className="ttl">▸ 段取り案</div>
           <h2>{title}</h2>
           <div className="sub">{site.sub}</div>
@@ -108,15 +119,18 @@ export function ResultView() {
                 <span className="ic">👷</span>職種別の必要人員
               </h3>
               <div className="crew">
-                {site.crew.map((c) => (
-                  <div className="row" key={c.r}>
-                    <div className="role">
-                      {c.r}
-                      {c.note ? <span className="note">{c.note}</span> : null}
+                {site.crew.map((c) => {
+                  const qty = c.r.includes("交通誘導") && guardCount ? guardCount : c.q;
+                  return (
+                    <div className="row" key={c.r}>
+                      <div className="role">
+                        {c.r}
+                        {c.note ? <span className="note">{c.note}</span> : null}
+                      </div>
+                      <div className="qty">×{qty}</div>
                     </div>
-                    <div className="qty">×{c.q}</div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div className="tot">
                   <span className="l">総人工</span>
                   <span className="n">
@@ -195,6 +209,8 @@ export function ResultView() {
             ))}
           </div>
         </div>
+
+        <ApproveBar />
       </div>
     </main>
   );

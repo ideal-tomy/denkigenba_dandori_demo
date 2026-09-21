@@ -5,8 +5,16 @@ function channelLabel(channel: IncomingRequest["channel"]) {
   return channel === "email" ? "メール" : "FAX";
 }
 
+function statusPill(status: "needs-check" | "draft" | "preparing" | "done") {
+  if (status === "needs-check") return <em className="pill is-warn">要確認</em>;
+  if (status === "preparing") return <em className="pill is-prep">準備中</em>;
+  if (status === "done") return <em className="pill is-ok">準備完了</em>;
+  return <em className="pill">未確定</em>;
+}
+
 function RequestCard({ request }: { request: IncomingRequest }) {
-  const { openRequest } = useDemo();
+  const { openRequest, statusOf } = useDemo();
+  const status = statusOf(request.id);
 
   return (
     <button type="button" className="inbox-card" onClick={() => openRequest(request.id)}>
@@ -15,9 +23,14 @@ function RequestCard({ request }: { request: IncomingRequest }) {
         <span className="inbox-time">{request.time}</span>
       </div>
       <div className="inbox-from">{request.from}</div>
-      <div className="inbox-subject">{request.subject}</div>
+      <div className="inbox-subject-row">
+        <div className="inbox-subject">{request.subject}</div>
+        {statusPill(status)}
+      </div>
       <p className="inbox-preview">{request.preview}</p>
-      <span className="inbox-cta">依頼を開く →</span>
+      <span className="inbox-cta">
+        {status === "preparing" || status === "done" ? "準備を開く →" : "依頼を開く →"}
+      </span>
     </button>
   );
 }

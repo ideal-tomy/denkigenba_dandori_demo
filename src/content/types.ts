@@ -6,7 +6,54 @@ export type RequestChannel = "email" | "fax";
 
 export type IngestStep = "receiving" | "reading" | "drafting";
 
-export type ViewMode = "inbox" | "ingest" | "result";
+export type ViewMode = "inbox" | "ingest" | "result" | "execute";
+
+export type EvidenceId =
+  | "request"
+  | "jurisdiction"
+  | "route-rule"
+  | "night-rule"
+  | "buried-utility";
+
+export type PlanStatus = "draft" | "approved";
+
+export type TaskStatus = "todo" | "ready" | "done";
+
+export type ExtractField = {
+  id: string;
+  label: string;
+  value: string;
+  editable?: boolean;
+  kind?: "text" | "date" | "number";
+  needsReview?: boolean;
+  reviewReason?: string;
+  evidenceId: EvidenceId;
+  highlight?: string;
+};
+
+export type ExecuteTask = {
+  id: string;
+  kind: "permit" | "crew";
+  title: string;
+  detail: string;
+  dueOffset: number;
+  actionLabel: string;
+};
+
+export type EvidenceRow = {
+  cells: string[];
+  hit?: boolean;
+};
+
+export type EvidenceDoc = {
+  id: EvidenceId;
+  title: string;
+  lead: string;
+  kind: "table" | "request";
+  headers?: string[];
+  rows?: EvidenceRow[];
+  highlight?: string;
+};
 
 export type SitePermit = {
   n: string;
@@ -69,4 +116,5 @@ export type IncomingRequest = {
   preview: string;
   body: string;
   workDate: string;
+  needsCheck: boolean;
 };

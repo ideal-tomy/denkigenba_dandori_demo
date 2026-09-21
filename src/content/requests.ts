@@ -35,6 +35,7 @@ ideal合同会社 御中
 北関東電設
 田村`,
     workDate: defaultWorkDate(),
+    needsCheck: true,
   },
   {
     id: "req-shinjuku",
@@ -54,5 +55,6 @@ ideal合同会社 御中
 
 担当：城東工業 手配係`,
     workDate: defaultWorkDate(),
+    needsCheck: true,
   },
 ];
