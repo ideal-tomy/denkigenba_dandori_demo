@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>現場ダンドリ — 電気工事の段取り</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15181E; --ink-soft:#565C66; --ink-faint:#8A909A;
+    --paper:#F4F3EF; --surface:#FFFFFF; --concrete:#ECEEF1; --line:#E1E3E8;
+    --navy:#16243F; --navy-soft:#27395C;
+    --amber:#F5A300; --amber-deep:#9A6A00; --amber-wash:#FFF4DB;
+    --red:#D8412F; --red-wash:#FBE9E6;
+    --green:#1C8C68; --green-wash:#E5F3EE;
+    --radius:14px;
+    --mono:'Roboto Mono',ui-monospace,monospace;
+    --sans:'Noto Sans JP',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ---- header ---- */
+  header{border-bottom:1px solid var(--line);background:rgba(244,243,239,.86);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.02em;font-size:18px}
+  .spark{width:26px;height:26px;border-radius:7px;background:var(--navy);display:grid;place-items:center;color:var(--amber);font-size:15px}
+  .brand small{font-weight:500;color:var(--ink-soft);font-size:11.5px;letter-spacing:.04em}
+  .axeon{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--ink-faint)}
+  .axeon b{color:var(--navy);font-weight:700}
+  .back-selection{display:none;font-size:13px;font-weight:600;color:var(--navy);text-decoration:none;padding:6px 0;border-bottom:1px solid transparent}
+  .back-selection:hover{border-bottom-color:var(--navy)}
+  .back-selection.is-on{display:inline-flex;align-items:center}
+
+  /* ---- hero ---- */
+  .hero{padding:62px 0 30px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--amber-deep);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:18px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--amber)}
+  h1{font-size:clamp(31px,5vw,50px);font-weight:900;line-height:1.18;letter-spacing:-.01em}
+  h1 .hl{color:var(--amber-deep);position:relative;white-space:nowrap}
+  h1 .hl::after{content:"";position:absolute;left:0;right:0;bottom:.08em;height:.34em;background:var(--amber);opacity:.32;z-index:-1}
+  .lede{margin-top:20px;font-size:17px;color:var(--ink-soft);max-width:640px}
+
+  /* ---- input panel ---- */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 rgba(20,24,30,.02)}
+  .intake{margin:34px 0 70px;overflow:hidden}
+  .intake-head{background:var(--navy);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px;letter-spacing:.02em}
+  .intake-head .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--amber);border:1px solid rgba(245,163,0,.5);border-radius:5px;padding:2px 8px;margin-left:auto}
+  .intake-body{padding:26px 24px}
+  .preset-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ink-faint);margin-bottom:12px}
+  .presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:26px}
+  .preset{text-align:left;cursor:pointer;border:1.5px solid var(--line);background:var(--paper);border-radius:11px;padding:15px 16px;transition:.16s;font-family:inherit}
+  .preset:hover{border-color:var(--amber);background:var(--amber-wash);transform:translateY(-1px)}
+  .preset.on{border-color:var(--amber);background:var(--amber-wash);box-shadow:inset 0 0 0 1px var(--amber)}
+  .preset .loc{font-weight:700;font-size:15px}
+  .preset .loc .pin{color:var(--amber-deep)}
+  .preset .meta{color:var(--ink-soft);font-size:12.5px;margin-top:3px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12px;color:var(--ink-soft);font-weight:500}
+  .field input,.field select{font-family:inherit;font-size:14.5px;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--navy)}
+  .span2{grid-column:1/-1}
+  .go{margin-top:22px;width:100%;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:16px;color:var(--navy);background:var(--amber);padding:15px;border-radius:10px;transition:.15s;letter-spacing:.02em}
+  .go:hover{filter:brightness(1.04);transform:translateY(-1px)}
+  .go:active{transform:translateY(0)}
+
+  /* ---- results ---- */
+  #result{display:none;padding-bottom:80px}
+  .back{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink-soft);background:none;border:none;cursor:pointer;padding:18px 0 6px;display:inline-flex;gap:7px;align-items:center}
+  .back:hover{color:var(--navy)}
+
+  .summary{background:var(--navy);color:#fff;border-radius:var(--radius);padding:26px 28px;position:relative;overflow:hidden}
+  .summary::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(245,163,0,.22),transparent 70%)}
+  .summary .ttl{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--amber);margin-bottom:7px}
+  .summary h2{font-size:23px;font-weight:900;line-height:1.3}
+  .summary .sub{color:#B9C3D6;font-size:13.5px;margin-top:7px}
+
+  .lockrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;position:relative;z-index:1}
+  @media(max-width:620px){.lockrow{grid-template-columns:1fr}}
+  .lock{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:15px 17px}
+  .lock .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:#90A0BC;display:flex;gap:7px;align-items:center}
+  .lock .v{font-size:19px;font-weight:900;margin-top:5px;letter-spacing:.01em}
+  .lock .n{font-size:12px;color:#AEB9CD;margin-top:4px}
+  .lock.lit .v{animation:lock .7s ease both}
+  @keyframes lock{0%{color:#fff}28%{color:var(--amber);text-shadow:0 0 18px rgba(245,163,0,.6)}100%{color:#fff}}
+  .lock .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;background:var(--amber);color:var(--navy);border-radius:4px;padding:1px 6px;margin-left:7px;font-weight:700;vertical-align:middle}
+
+  .compare{display:inline-flex;align-items:center;gap:9px;margin-top:18px;position:relative;z-index:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 7px 7px 15px;font-size:12.5px;color:#C7D0E0}
+  .compare button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;border:none;cursor:pointer;border-radius:999px;padding:6px 13px;background:var(--amber);color:var(--navy);font-weight:700}
+  .compare.nara button{background:#5B6A86;color:#fff}
+
+  .secttl{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;color:var(--ink-faint);margin:38px 0 14px;display:flex;align-items:center;gap:10px}
+  .secttl::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.cards{grid-template-columns:1fr}}
+  .card{padding:20px 21px}
+  .card h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .card h3 .ic{width:26px;height:26px;border-radius:7px;background:var(--amber-wash);color:var(--amber-deep);display:grid;place-items:center;font-size:14px}
+
+  .permit{border-top:1px solid var(--line);padding:13px 0}
+  .permit:first-of-type{border-top:none;padding-top:0}
+  .permit .pn{font-weight:700;font-size:14.5px}
+  .permit .pto{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .permit .pto b{color:var(--navy);font-weight:700}
+  .permit .deadline{font-family:var(--mono);font-size:11.5px;color:var(--red);background:var(--red-wash);border-radius:6px;padding:3px 9px;display:inline-block;margin-top:8px;letter-spacing:.02em}
+  .draftbtn{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--navy);background:none;border:1.5px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer;margin-top:9px;margin-left:9px;transition:.14s}
+  .draftbtn:hover{border-color:var(--amber);background:var(--amber-wash)}
+
+  .crew{display:flex;flex-direction:column;gap:0}
+  .crew .row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+  .crew .row:first-child{border-top:none;padding-top:0}
+  .crew .role{flex:1;font-size:14px}
+  .crew .role .note{display:block;font-size:11.5px;color:var(--amber-deep);margin-top:1px}
+  .crew .qty{font-family:var(--mono);font-weight:700;font-size:15px}
+  .crew .tot{margin-top:14px;background:var(--navy);color:#fff;border-radius:10px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+  .crew .tot .l{font-size:12.5px;color:#B9C3D6}
+  .crew .tot .n{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--amber)}
+  .crew .tot .n small{font-size:13px;color:#fff;font-weight:500;margin-left:3px}
+
+  .doc{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+  .doc:first-child{border-top:none;padding-top:0}
+  .doc .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
+  .doc .dn{flex:1}
+  .doc .dn .note{font-size:11.5px;color:var(--ink-soft)}
+
+  /* timeline */
+  .tl{position:relative;padding-left:30px}
+  .tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .ti{position:relative;padding:9px 0}
+  .ti::before{content:"";position:absolute;left:-26px;top:14px;width:11px;height:11px;border-radius:50%;background:var(--surface);border:2.5px solid var(--amber)}
+  .ti.today::before{background:var(--navy);border-color:var(--navy);width:13px;height:13px;left:-27px}
+  .ti .d{font-family:var(--mono);font-size:12px;color:var(--navy);font-weight:700}
+  .ti .t{font-size:14px;margin-top:1px}
+  .ti .o{font-size:11.5px;color:var(--ink-soft)}
+  .ti.today .t{font-weight:700}
+
+  /* reasons */
+  .reasons{padding:22px 24px;background:var(--amber-wash);border:1px solid #F3DDA6;border-radius:var(--radius);margin-top:18px}
+  .reasons .rh{font-weight:700;font-size:14.5px;display:flex;gap:9px;align-items:center;margin-bottom:13px}
+  .reason{display:flex;gap:11px;padding:8px 0;font-size:13.5px;line-height:1.6}
+  .reason .arr{font-family:var(--mono);color:var(--amber-deep);font-weight:700;flex-shrink:0}
+  .reason b{color:var(--navy)}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(21,24,30,.55);display:none;place-items:center;z-index:50;padding:20px}
+  .scrim.on{display:grid}
+  .modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 30px 60px rgba(0,0,0,.3)}
+  .modal-h{position:sticky;top:0;background:var(--navy);color:#fff;padding:15px 20px;display:flex;align-items:center;justify-content:space-between}
+  .modal-h .mt{font-weight:700;font-size:14.5px}
+  .modal-h .mtag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--amber);border:1px solid rgba(245,163,0,.5);border-radius:4px;padding:2px 7px;margin-left:10px}
+  .modal-h .x{background:none;border:none;color:#fff;cursor:pointer;font-size:20px;line-height:1}
+  .modal-b{padding:22px 24px}
+  .form-preview{font-size:13px}
+  .form-preview .ftitle{text-align:center;font-weight:700;font-size:16px;letter-spacing:.3em;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:18px}
+  .frow{display:flex;border-bottom:1px solid var(--line);padding:9px 2px}
+  .frow .fk{width:130px;flex-shrink:0;color:var(--ink-soft);font-size:12.5px}
+  .frow .fv{font-weight:500}
+  .frow .fv .auto{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--amber-deep);background:var(--amber-wash);border-radius:4px;padding:1px 6px;margin-left:7px}
+  .modal-note{font-size:12px;color:var(--ink-soft);background:var(--concrete);border-radius:9px;padding:12px 14px;margin-top:18px;line-height:1.6}
+
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--ink-faint);font-size:12px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
+  .disc{max-width:640px;line-height:1.6}
+
+  .reveal{opacity:0;transform:translateY(14px);animation:rise .5s ease forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.reveal,.lock.lit .v{animation:none;opacity:1;transform:none}}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand"><span class="spark">⚡</span>現場ダンドリ<small>電気工事の段取り</small></div>
+    <a class="back-selection" id="back-selection" href="https://axeon-demo-selection.vercel.app/?demo=field-dandori">← 紹介へ</a>
+  </div>
+</header>
+
+<!-- ============ INPUT ============ -->
+<main id="input">
+  <div class="wrap hero">
+    <span class="eyebrow">電気工事 / 屋外・道路工事</span>
+    <h1>現場を選ぶと、<br><span class="hl">申請・人員・書類</span>が並びます。</h1>
+    <p class="lede">サンプル現場から、所轄の警察署・道路管理者と、必要な申請・人員・書類の見通しを同じ画面で確認できます。提出先の確定は、担当者が行います。</p>
+  </div>
+
+  <div class="wrap">
+    <section class="panel intake">
+      <div class="intake-head">⚡ 現場を入力</div>
+      <div class="intake-body">
+        <div class="preset-lbl">▸ サンプル現場を選ぶ</div>
+        <div class="presets" id="presets"></div>
+
+        <div class="grid2">
+          <div class="field span2">
+            <label>現場住所</label>
+            <input id="f-addr" type="text" value="東京都渋谷区道玄坂2丁目">
+          </div>
+          <div class="field span2">
+            <label>工事種別</label>
+            <select id="f-type">
+              <option>電柱新設・建柱／引込線張替え</option>
+              <option>屋外配電・地中ケーブル敷設（掘削あり）</option>
+              <option>架空線改修</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>作業日</label>
+            <input id="f-date" type="date">
+          </div>
+          <div class="field">
+            <label>時間帯</label>
+            <select id="f-time"><option>日中</option><option>夜間</option></select>
+          </div>
+        </div>
+        <button class="go" onclick="generate()">段取りを組み立てる →</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ RESULT ============ -->
+<main id="result">
+  <div class="wrap">
+    <button class="back" onclick="reset()">← 別の現場で試す</button>
+
+    <section class="summary reveal" id="summary"></section>
+
+    <div class="secttl">申請（許可）</div>
+    <div class="panel card reveal" id="permits" style="animation-delay:.05s"></div>
+
+    <div class="cards">
+      <div>
+        <div class="secttl">必要人員</div>
+        <div class="panel card reveal" id="crew" style="animation-delay:.1s"></div>
+      </div>
+      <div>
+        <div class="secttl">必要書類</div>
+        <div class="panel card reveal" id="docs" style="animation-delay:.15s"></div>
+      </div>
+    </div>
+
+    <div class="secttl">スケジュール（作業日から逆算）</div>
+    <div class="panel card reveal" id="schedule" style="animation-delay:.2s"></div>
+
+    <div class="reveal" id="reasons" style="animation-delay:.25s"></div>
+  </div>
+</main>
+
+<!-- modal -->
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h"><span><span class="mt" id="m-title"></span><span class="mtag">下書き</span></span><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-b" id="m-body"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="disc">※ 本画面はデモです。表示される所轄・期限・人員数などはサンプル値で、実際の運用では路線種別・自治体ごとのマスタデータに基づいて確定します。許可窓口・提出期限は所轄の運用により異なるため、最終確認が前提です。</div>
+    <div class="axeon"><b>AXEON</b>株式会社</div>
+  </div>
+</footer>
+
+<script>
+const SC = {
+  shibuya:{
+    label:"渋谷", addr:"東京都渋谷区道玄坂2丁目", type:"電柱新設・建柱／引込線張替え", time:"日中",
+    locname:"渋谷区道玄坂2丁目", title:"渋谷区道玄坂の段取り案",
+    sub:"電柱新設・建柱／引込線張替え ・ 日中 ・ 車道にかかる作業",
+    police:{v:"渋谷警察署", n:"道路使用許可の提出先（道交法77条）", badge:"指定路線"},
+    admin:{v:"渋谷区 土木部", n:"特別区道のため道路占用は区が窓口（道路法32条）"},
+    nara:{police:"奈良西警察署", admin:"奈良県 高田土木事務所"},
+    permits:[
+      {n:"道路使用許可", to:"渋谷警察署 長", lead:7, leadu:"開庁日", draft:"road-use"},
+      {n:"道路占用許可", to:"渋谷区 土木部 道路課", lead:21, leadu:"日", draft:"road-occupy"}
+    ],
+    crew:[
+      {r:"第一種電気工事士", q:2},
+      {r:"交通誘導警備員", q:2, note:"うち交通誘導2級 ×1（公安委員会指定路線のため）"},
+      {r:"高所作業車 運転者", q:1, note:"建柱の高所作業に必要"},
+      {r:"主任技術者／現場代理人", q:1}
+    ],
+    docs:[
+      {n:"道路使用許可申請書", note:"下書きを確認できます", draft:"road-use"},
+      {n:"道路占用許可申請書", note:"下書きを確認できます", draft:"road-occupy"},
+      {n:"作業計画書", note:"下書きを確認できます", draft:"plan"},
+      {n:"施工体制台帳", note:""},
+      {n:"安全書類（グリーンファイル一式）", note:""},
+      {n:"KY活動記録", note:""}
+    ],
+    sched:[
+      {off:21,t:"道路占用許可を申請",o:"提出先：渋谷区 土木部"},
+      {off:14,t:"警備会社へ配置依頼",o:"交通誘導2級を含む2名を確保"},
+      {off:10,t:"作業計画書・施工体制台帳を確定",o:""},
+      {off:7,t:"道路使用許可を申請",o:"提出先：渋谷警察署"},
+      {off:3,t:"KY・安全書類を最終確認",o:""}
+    ],
+    reasons:[
+      {h:"車道にかかる作業",b:"道路使用許可（警察）と道路占用許可（道路管理者）の<b>両方</b>が必要です。"},
+      {h:"道玄坂は公安委員会の指定路線",b:"交通誘導は<b>検定2級保有者</b>を配置する必要があります。"},
+      {h:"建柱による高所作業",b:"<b>高所作業車の運転資格者</b>が人員に含まれます。"}
+    ]
+  },
+  shinjuku:{
+    label:"新宿", addr:"東京都新宿区西新宿7丁目", type:"屋外配電・地中ケーブル敷設（掘削あり）", time:"夜間",
+    locname:"新宿区西新宿7丁目", title:"新宿区西新宿の段取り案",
+    sub:"地中ケーブル敷設（掘削あり） ・ 夜間 ・ 車道にかかる作業",
+    police:{v:"新宿警察署", n:"道路使用許可の提出先（道交法77条）", badge:"夜間条件"},
+    admin:{v:"東京都 第三建設事務所", n:"都道のため道路占用は都が窓口（要路線確認）"},
+    nara:{police:"奈良警察署", admin:"奈良市 道路建設課"},
+    permits:[
+      {n:"道路使用許可", to:"新宿警察署 長", lead:7, leadu:"開庁日", draft:"road-use", note:"夜間作業の条件付き"},
+      {n:"道路占用許可", to:"東京都 第三建設事務所", lead:21, leadu:"日", draft:"road-occupy"},
+      {n:"埋設物照会", to:"各インフラ事業者（ガス・水道・通信）", lead:30, leadu:"日", draft:null}
+    ],
+    crew:[
+      {r:"第一種電気工事士", q:2},
+      {r:"交通誘導警備員", q:3, note:"夜間・掘削開口部のため増員（うち2級 ×1）"},
+      {r:"掘削重機オペレーター", q:1},
+      {r:"主任技術者／現場代理人", q:1}
+    ],
+    docs:[
+      {n:"道路使用許可申請書", note:"夜間条件を反映", draft:"road-use"},
+      {n:"道路占用許可申請書", note:"下書きを確認できます", draft:"road-occupy"},
+      {n:"埋設物照会・試掘記録", note:"掘削工事のため必須"},
+      {n:"夜間工事 近隣周知文", note:"下書きを確認できます", draft:"plan"},
+      {n:"作業計画書", note:""},
+      {n:"安全書類（グリーンファイル一式）", note:""}
+    ],
+    sched:[
+      {off:30,t:"埋設物照会・現地試掘",o:"ガス・水道・通信の各事業者へ"},
+      {off:21,t:"道路占用許可を申請",o:"提出先：東京都 第三建設事務所"},
+      {off:14,t:"警備会社へ配置依頼",o:"夜間対応・3名を確保"},
+      {off:10,t:"夜間工事の近隣周知を配布",o:""},
+      {off:7,t:"道路使用許可を申請",o:"提出先：新宿警察署（夜間条件）"},
+      {off:3,t:"KY・安全書類を最終確認",o:""}
+    ],
+    reasons:[
+      {h:"掘削をともなう工事",b:"着工前に<b>各インフラ事業者への埋設物照会</b>と試掘が必要です。"},
+      {h:"夜間作業",b:"<b>近隣周知</b>と夜間の道路使用条件が追加されます。"},
+      {h:"開口部のある車道作業",b:"安全確保のため<b>交通誘導員を増員</b>しています。"}
+    ]
+  }
+};
+
+let active="shibuya", naraMode=false;
+
+function fmtDate(d){const w=["日","月","火","水","木","金","土"];return (d.getMonth()+1)+"月"+d.getDate()+"日（"+w[d.getDay()]+"）";}
+function workDate(){const v=document.getElementById('f-date').value;return v?new Date(v+"T00:00:00"):new Date(Date.now()+30*864e5);}
+
+function renderPresets(){
+  const el=document.getElementById('presets');
+  el.innerHTML=Object.entries(SC).map(([k,s])=>`
+    <button class="preset ${k===active?'on':''}" onclick="pick('${k}')">
+      <div class="loc"><span class="pin">📍</span> ${s.addr}</div>
+      <div class="meta">${s.type} ・ ${s.time}</div>
+    </button>`).join('');
+}
+function pick(k){active=k;const s=SC[k];
+  document.getElementById('f-addr').value=s.addr;
+  document.getElementById('f-type').value=s.type;
+  document.getElementById('f-time').value=s.time;
+  renderPresets();
+}
+
+function jurisdiction(s){
+  if(naraMode) return {pv:s.nara.police, av:s.nara.admin, badge:""};
+  return {pv:s.police.v, av:s.admin.v, badge:s.police.badge};
+}
+
+function renderSummary(){
+  const s=SC[active], j=jurisdiction(s);
+  document.getElementById('summary').innerHTML=`
+    <div class="ttl">▸ 段取り案</div>
+    <h2>${naraMode? "（参考）"+s.nara.police.replace('警察署','')+"エリアの同じ工事":s.title}</h2>
+    <div class="sub">${s.sub}</div>
+    <div class="lockrow">
+      <div class="lock lit"><div class="k">⚡ 所轄警察署 ／ 道路使用許可</div><div class="v">${j.pv}${j.badge?`<span class="badge">${j.badge}</span>`:''}</div><div class="n">${naraMode?'地元の所轄':s.police.n}</div></div>
+      <div class="lock lit"><div class="k">⚡ 道路管理者 ／ 道路占用許可</div><div class="v">${j.av}</div><div class="n">${naraMode?'地元の管理者':s.admin.n}</div></div>
+    </div>
+    <div class="compare ${naraMode?'nara':''}">
+      ${naraMode?'地元（奈良）の段取りを表示中':'もし奈良の同じ工事なら？'}
+      <button onclick="toggleNara()">${naraMode?'東京に戻す':'奈良と比較'}</button>
+    </div>`;
+}
+function toggleNara(){naraMode=!naraMode;renderSummary();
+  document.querySelectorAll('.lock').forEach(l=>{l.classList.remove('lit');void l.offsetWidth;l.classList.add('lit');});
+}
+
+function renderPermits(){
+  const s=SC[active];
+  document.getElementById('permits').innerHTML=`
+    <h3><span class="ic">🗂</span>必要な申請</h3>`+
+    s.permits.map(p=>{
+      const dl=new Date(workDate().getTime()-p.lead*864e5);
+      return `<div class="permit">
+        <div class="pn">${p.n}${p.note?` <span style="font-size:12px;color:var(--ink-soft);font-weight:400">／ ${p.note}</span>`:''}</div>
+        <div class="pto">提出先：<b>${p.to}</b></div>
+        <span class="deadline">締切 ${fmtDate(dl)}（作業日の${p.lead}${p.leadu}前）</span>
+        ${p.draft?`<button class="draftbtn" onclick="openDraft('${p.draft}')">申請書ドラフトを見る</button>`:''}
+      </div>`;
+    }).join('');
+}
+
+function renderCrew(){
+  const s=SC[active];let tot=0;s.crew.forEach(c=>tot+=c.q);
+  document.getElementById('crew').innerHTML=`
+    <h3><span class="ic">👷</span>職種別の必要人員</h3>
+    <div class="crew">
+      ${s.crew.map(c=>`<div class="row"><div class="role">${c.r}${c.note?`<span class="note">${c.note}</span>`:''}</div><div class="qty">×${c.q}</div></div>`).join('')}
+      <div class="tot"><span class="l">総人工</span><span class="n">${tot}<small>名／日</small></span></div>
+    </div>`;
+}
+
+function renderDocs(){
+  const s=SC[active];
+  document.getElementById('docs').innerHTML=`
+    <h3><span class="ic">📄</span>そろえる書類</h3>
+    ${s.docs.map(d=>`<div class="doc"><span class="dot"></span><span class="dn">${d.n}${d.note?`<span class="note"> ／ ${d.note}</span>`:''}</span>${d.draft?`<button class="draftbtn" style="margin:0" onclick="openDraft('${d.draft}')">下書き</button>`:''}</div>`).join('')}`;
+}
+
+function renderSchedule(){
+  const s=SC[active], wd=workDate();
+  const items=[...s.sched].sort((a,b)=>b.off-a.off);
+  let h=`<h3 style="margin-bottom:18px"><span class="ic">📅</span>作業日 ${fmtDate(wd)} に向けて</h3><div class="tl">`;
+  items.forEach(it=>{const d=new Date(wd.getTime()-it.off*864e5);
+    h+=`<div class="ti"><div class="d">${fmtDate(d)} ・ ${it.off}日前</div><div class="t">${it.t}</div>${it.o?`<div class="o">${it.o}</div>`:''}</div>`;});
+  h+=`<div class="ti today"><div class="d">${fmtDate(wd)}</div><div class="t">作業実施</div></div></div>`;
+  document.getElementById('schedule').innerHTML=h;
+}
+
+function renderReasons(){
+  const s=SC[active];
+  document.getElementById('reasons').innerHTML=`
+    <div class="reasons"><div class="rh">⚡ なぜこの段取りになったか</div>
+      ${s.reasons.map(r=>`<div class="reason"><span class="arr">→</span><div><b>${r.h}</b> だから、${r.b}</div></div>`).join('')}
+    </div>`;
+}
+
+function generate(){
+  naraMode=false;
+  document.getElementById('input').style.display='none';
+  document.getElementById('result').style.display='block';
+  renderSummary();renderPermits();renderCrew();renderDocs();renderSchedule();renderReasons();
+  window.scrollTo(0,0);
+}
+function reset(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('input').style.display='block';
+  window.scrollTo(0,0);
+}
+
+// ---- draft modal ----
+function openDraft(kind){
+  const s=SC[active], wd=workDate();
+  const period=fmtDate(wd)+" 〜 "+fmtDate(new Date(wd.getTime()+2*864e5));
+  let title="",rows=[];
+  if(kind==="road-use"){
+    title="道路使用許可申請書";
+    rows=[["申請者"," ideal合同会社（御社名）"],["道路使用の場所","<auto>"+s.locname+"</auto> 先 車道・歩道"],
+      ["使用の期間",period],["使用の目的","電気工事（建柱・配線作業）"],["使用の方法","保安柵設置・交通誘導員配置のうえ片側交互通行"],["提出先","<auto>"+(naraMode?s.nara.police:s.police.v)+"</auto> 長 殿"]];
+  }else if(kind==="road-occupy"){
+    title="道路占用許可申請書";
+    rows=[["占用者","ideal合同会社（御社名）"],["占用の場所","<auto>"+s.locname+"</auto>"],
+      ["占用物件","電柱・地中管路 ほか"],["占用の期間",period],["道路管理者","<auto>"+(naraMode?s.nara.admin:s.admin.v)+"</auto>"]];
+  }else{
+    title=active==="shinjuku"?"夜間工事 近隣周知文":"作業計画書";
+    rows=[["件名",(active==="shinjuku"?"夜間電気工事のお知らせ":"電気工事 作業計画")],["場所","<auto>"+s.locname+"</auto>"],
+      ["日時",period+(active==="shinjuku"?" 22:00〜翌5:00":" 9:00〜17:00")],["作業内容",s.type],["緊急連絡先","現場代理人 ／ ○○-○○○○-○○○○"]];
+  }
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').innerHTML=`<div class="form-preview">
+    <div class="ftitle">${title}</div>
+    ${rows.map(r=>`<div class="frow"><div class="fk">${r[0]}</div><div class="fv">${r[1].replace(/<auto>(.*?)<\/auto>/,'$1<span class="auto">自動入力</span>')}</div></div>`).join('')}
+  </div>
+  <div class="modal-note">「自動入力」のタグが付いた項目は、現場の住所と段取り案から埋めた箇所です。提出前に、担当者が内容を確認します。</div>`;
+  document.getElementById('scrim').classList.add('on');
+}
+function closeModal(){document.getElementById('scrim').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function syncSelectionReturn(){
+  const params=new URLSearchParams(window.location.search);
+  const from=params.get('from')==='axeon-demo-selection';
+  if(from) sessionStorage.setItem('field-dandori-from-selection','1');
+  const show=from||sessionStorage.getItem('field-dandori-from-selection')==='1';
+  const link=document.getElementById('back-selection');
+  if(link&&show) link.classList.add('is-on');
+}
+
+// init
+(function(){
+  const d=new Date(Date.now()+30*864e5);
+  document.getElementById('f-date').value=d.toISOString().slice(0,10);
+  renderPresets();
+  syncSelectionReturn();
+})();
+</script>
+</body>
+</html>
