@@ -85,6 +85,15 @@ type Store = {
   lockPulse: number;
 };
 
+export type IntroSeed = {
+  view: ViewMode;
+  activeId?: string;
+  planStatus?: PlanStatus;
+  seenEvidence?: EvidenceId[];
+  clearedReviews?: string[];
+  evidenceId?: EvidenceId | null;
+};
+
 const Ctx = createContext<Store | null>(null);
 
 const INGEST_STEPS: IngestStep[] = ["receiving", "reading", "drafting"];
@@ -114,23 +123,41 @@ function fieldNeedsReview(field: ExtractField, cleared: string[]): boolean {
   return Boolean(field.needsReview) && !cleared.includes(field.id);
 }
 
-export function DemoProvider({ children }: { children: ReactNode }) {
-  const [view, setView] = useState<ViewMode>("inbox");
-  const [activeId, setActiveId] = useState<string | null>(null);
+export function DemoProvider({
+  children,
+  introSeed,
+}: {
+  children: ReactNode;
+  introSeed?: IntroSeed;
+}) {
+  const [view, setView] = useState<ViewMode>(introSeed?.view ?? "inbox");
+  const [activeId, setActiveId] = useState<string | null>(introSeed?.activeId ?? null);
   const [ingestStep, setIngestStep] = useState<IngestStep>("receiving");
   const [naraMode, setNaraMode] = useState(false);
   const [draftKind, setDraftKind] = useState<DraftKind | null>(null);
-  const [evidenceId, setEvidenceId] = useState<EvidenceId | null>(null);
+  const [evidenceId, setEvidenceId] = useState<EvidenceId | null>(introSeed?.evidenceId ?? null);
   const [packetTaskId, setPacketTaskId] = useState<string | null>(null);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const [lockPulse, setLockPulse] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
-  const [states, setStates] = useState(initialStates);
+  const [states, setStates] = useState(() => {
+    const next = initialStates();
+    if (!introSeed?.activeId) return next;
+    const current = next[introSeed.activeId];
+    next[introSeed.activeId] = {
+      ...current,
+      planStatus: introSeed.planStatus ?? current.planStatus,
+      seenEvidence: introSeed.seenEvidence ?? current.seenEvidence,
+      clearedReviews: introSeed.clearedReviews ?? current.clearedReviews,
+    };
+    return next;
+  });
 
   useEffect(() => {
+    if (introSeed) return;
     syncSelectionEntry();
     setReturnUrl(selectionReturnUrl());
-  }, []);
+  }, [introSeed]);
 
   const activeRequest = useMemo(
     () => incomingRequests.find((r) => r.id === activeId) ?? null,

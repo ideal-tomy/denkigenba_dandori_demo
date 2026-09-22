@@ -1,5 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { DeskApp } from "./app/DeskApp";
+import { DemoIntro } from "./components/demo-intro/DemoIntro";
+
+function isEmbedIntro() {
+  return new URLSearchParams(window.location.search).get("embed") === "intro";
+}
 
 function RedirectToDesk() {
   const { search } = useLocation();
@@ -7,6 +12,14 @@ function RedirectToDesk() {
 }
 
 export default function App() {
+  if (isEmbedIntro()) {
+    return (
+      <main className="ki-embed-intro">
+        <DemoIntro />
+      </main>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
