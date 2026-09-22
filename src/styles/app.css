@@ -119,7 +119,8 @@ header {
 }
 
 .hero {
-  padding: 62px 0 30px;
+  padding-top: 62px;
+  padding-bottom: 30px;
 }
 
 .eyebrow {
@@ -152,7 +153,6 @@ h1 {
 h1 .hl {
   color: var(--amber-deep);
   position: relative;
-  white-space: nowrap;
 }
 
 h1 .hl::after {
@@ -1902,6 +1902,31 @@ footer .wrap {
   .order-meta {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .wrap {
+    padding-inline: max(16px, env(safe-area-inset-left, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .hero {
+    padding-top: 40px;
+    padding-bottom: 22px;
+  }
+
+  .inbox-wrap {
+    margin-bottom: 48px;
+  }
+
+  .inbox-head,
+  .inbox-card {
+    padding-inline: 16px;
+  }
+
+  .lede {
+    font-size: 16px;
   }
 }
 

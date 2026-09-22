@@ -45,7 +45,9 @@ export function InboxView() {
         <h1>
           届いた依頼から、
           <br />
-          <span className="hl">申請・人員・書類</span>が並びます。
+          <span className="hl">申請・人員・書類</span>
+          <br />
+          が並びます。
         </h1>
         <p className="lede">
           メールやFAXで届いた依頼を開くと、所轄の警察署・道路管理者と、必要な申請・人員・書類の見通しが同じ画面で確認できます。提出先の確定は、担当者が行います。
