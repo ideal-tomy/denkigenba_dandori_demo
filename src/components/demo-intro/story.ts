@@ -4,6 +4,7 @@ export type DeviceId = "inbox" | "plan" | "prep";
 export const scenes: {
   title: string;
   caption: string;
+  motion: string;
   duration: number;
   camera: Camera;
   stars: readonly DeviceId[];
@@ -11,6 +12,7 @@ export const scenes: {
   {
     title: "依頼を開く",
     caption: "届いたメールとFAXの依頼が並びます。",
+    motion: "依頼を開く",
     duration: 5000,
     camera: [264, 175, 1.02],
     stars: ["inbox"],
@@ -18,6 +20,7 @@ export const scenes: {
   {
     title: "案へ",
     caption: "開くと、取り込んだ内容と段取り案が出ます。",
+    motion: "案へ",
     duration: 4500,
     camera: [516, 175, 0.9],
     stars: ["inbox", "plan"],
@@ -25,6 +28,7 @@ export const scenes: {
   {
     title: "日付を見る",
     caption: "依頼文の日付を、根拠で確認します。",
+    motion: "日付を見る",
     duration: 5500,
     camera: [768, 175, 1.0],
     stars: ["plan"],
@@ -32,6 +36,7 @@ export const scenes: {
   {
     title: "原文を見る",
     caption: "原文と、取り込んだ日付を突き合わせます。",
+    motion: "原文を見る",
     duration: 5500,
     camera: [768, 175, 1.0],
     stars: ["plan"],
@@ -39,6 +44,7 @@ export const scenes: {
   {
     title: "準備へ",
     caption: "確定すると、申請と人員の準備が並びます。",
+    motion: "準備へ",
     duration: 4500,
     camera: [1020, 175, 0.9],
     stars: ["plan", "prep"],
@@ -46,6 +52,7 @@ export const scenes: {
   {
     title: "書類をそろえる",
     caption: "書類をそろえます。提出はしません。",
+    motion: "書類をそろえる",
     duration: 5500,
     camera: [1272, 175, 0.98],
     stars: ["prep"],
